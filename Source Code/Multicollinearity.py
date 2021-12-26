@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 
-
+# Code to generate a multivariate dataset.
 def make_regression_multivariate(
     n_samples,
     n_uncorrelated,
@@ -18,24 +18,30 @@ def make_regression_multivariate(
 ):
     np.random.seed(seed)
 
+    # First, generate data of the correlated features.
     X_correlated = None
     if n_correlated > 0:
+        # Compute the covariance matrix.
         cov = correlation * np.ones((n_correlated, n_correlated)) + (
             1 - correlation
         ) * np.eye(n_correlated)
 
+        # Generate data using the covariance matrix.
         X_correlated = np.random.multivariate_normal(
             mean=np.zeros(n_correlated),
             cov=cov,
             size=n_samples,
         )
 
+    # Second, generate data of the uncorrelated features (if any)
     X_uncorrelated = None
     if n_uncorrelated > 0:
+        # Covariance martix is just identity matrix.
         X_uncorrelated = np.random.multivariate_normal(
             mean=np.zeros(n_uncorrelated), cov=np.eye(n_uncorrelated), size=n_samples
         )
 
+    # Combine correlated and uncorrelated datasets if needed.
     X = None
     if n_uncorrelated <= 0:
         X = X_correlated
@@ -44,7 +50,9 @@ def make_regression_multivariate(
     else:
         X = np.hstack([X_correlated, X_uncorrelated])
 
+    # Generate noise.
     e = np.random.normal(loc=0, scale=noise, size=n_samples)
+    # Compute the target dataset using the features dataset, adding on bias and noise.
     y = bias + np.dot(X, weights) + e
 
     return X, y
